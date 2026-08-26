@@ -1,0 +1,1 @@
+export { getEvidence } from './analysisService';

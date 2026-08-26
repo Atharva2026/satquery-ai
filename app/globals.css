@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #07111F;
+    --foreground: #F3F7FC;
+  }
+}
+
+@layer base {
+  * {
+    border-color: #24344A;
+  }
+  html, body {
+    background-color: #07111F;
+    color: #F3F7FC;
+    overflow-x: hidden;
+    antialiased: true;
+    font-feature-settings: 'cv11', 'ss01', 'tnum';
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer components {
+  /* Scope font-mono exclusively for technical data like session IDs, coordinates, timestamps, and execution trace step IDs */
+  .font-data-mono {
+    font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-feature-settings: 'tnum';
+  }
+
+  .sq-grid-overlay-dark {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .sq-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .sq-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sq-scrollbar::-webkit-scrollbar-thumb {
+    background: #24344A;
+    border-radius: 9999px;
+  }
+  .sq-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #3B5270;
+  }
+
+  /* Pulse reticle animation */
+  @keyframes reticle-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.04);
+      opacity: 0.85;
+    }
+  }
+
+  .animate-reticle {
+    animation: reticle-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
