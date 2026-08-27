@@ -62,7 +62,19 @@ export default async function EvidenceDetailPage({
                   </div>
                 </div>
                 <DecisionBadge
-                  verdict={evidence.confidence >= 0.7 ? 'CONFIDENT' : evidence.confidence >= 0.4 ? 'UNCERTAIN' : 'ABSTAIN'}
+                  verdict={
+                    typeof evidence.confidence === 'number'
+                      ? evidence.confidence >= 0.7
+                        ? 'CONFIDENT'
+                        : evidence.confidence >= 0.4
+                        ? 'UNCERTAIN'
+                        : 'ABSTAIN'
+                      : evidence.confidence === 'high'
+                      ? 'CONFIDENT'
+                      : evidence.confidence === 'moderate'
+                      ? 'UNCERTAIN'
+                      : 'ABSTAIN'
+                  }
                   size="md"
                 />
               </div>
@@ -72,10 +84,10 @@ export default async function EvidenceDetailPage({
                   Bi-Temporal Visual Comparison
                 </span>
                 <ComparisonViewer
-                  beforeImage={evidence.imagery.before}
-                  afterImage={evidence.imagery.after}
-                  beforeLabel={`Before · ${evidence.temporal.t1}`}
-                  afterLabel={`After · ${evidence.temporal.t2}`}
+                  beforeImage={evidence.imagery.before || ''}
+                  afterImage={evidence.imagery.after || ''}
+                  beforeLabel={`Before · ${evidence.temporal?.t1 || 'T1'}`}
+                  afterLabel={`After · ${evidence.temporal?.t2 || 'T2'}`}
                   className="h-80 rounded-lg overflow-hidden border border-[#24344A]"
                 />
               </div>
@@ -165,7 +177,19 @@ export default async function EvidenceDetailPage({
                     Calibrated Confidence
                   </dt>
                   <dd>
-                    <ConfidenceMeter value={evidence.confidence} size="sm" showScale />
+                    <ConfidenceMeter
+                      value={
+                        typeof evidence.confidence === 'number'
+                          ? evidence.confidence
+                          : evidence.confidence === 'high'
+                          ? 0.92
+                          : evidence.confidence === 'moderate'
+                          ? 0.65
+                          : 0.3
+                      }
+                      size="sm"
+                      showScale
+                    />
                   </dd>
                 </div>
                 <div>
@@ -174,7 +198,7 @@ export default async function EvidenceDetailPage({
                   </dt>
                   <dd className="font-medium text-[#F3F7FC] mt-0.5 flex items-center gap-1.5 font-mono">
                     <Crosshair size={13} className="text-[#20A4F3]" />
-                    {evidence.temporal.t1} → {evidence.temporal.t2}
+                    {evidence.temporal ? `${evidence.temporal.t1} → ${evidence.temporal.t2}` : 'Current observation pass'}
                   </dd>
                 </div>
                 <div>

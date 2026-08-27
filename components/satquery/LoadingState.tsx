@@ -17,7 +17,7 @@ export function LoadingState({ currentStep, className }: LoadingStateProps) {
         </span>
       </div>
       <div className="space-y-2.5">
-        {loadingSteps.map((step, idx) => {
+        {loadingSteps.map((step: { key: string; label: string }, idx: number) => {
           const isComplete = idx < currentStep;
           const isRunning = idx === currentStep;
           return (

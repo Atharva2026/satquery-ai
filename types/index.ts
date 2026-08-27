@@ -1,6 +1,8 @@
-// ── SatQuery AI Domain Types ──────────────────────────────────────────────
+// ── SatQuery AI Domain Types & Contracts ──────────────────────────────────────────────
 
 export type Verdict = 'CONFIDENT' | 'UNCERTAIN' | 'ABSTAIN';
+
+export type AnalysisMode = 'single' | 'temporal' | 'optical-sar';
 
 export type AnalysisStatus =
   | 'idle'
@@ -10,11 +12,24 @@ export type AnalysisStatus =
   | 'abstain'
   | 'error';
 
-export type TaskMode = 'VQA' | 'CHANGE' | 'GROUND' | 'COMPARE';
+export type Modality = 'optical' | 'multispectral' | 'sar' | 'unknown';
 
-export type SensorType = 'OPTICAL' | 'SAR' | 'TEMPORAL';
+export type RunStatus =
+  | 'draft'
+  | 'validating'
+  | 'planned'
+  | 'running'
+  | 'completed'
+  | 'limited'
+  | 'clarification'
+  | 'failed'
+  | 'abstained';
 
-export type LayerKey = 'OPTICAL' | 'SAR' | 'CHANGE' | 'GROUNDING' | 'EVIDENCE';
+export type TaskMode = 'VQA' | 'CHANGE' | 'GROUND' | 'COMPARE' | 'FUSION';
+
+export type SensorType = 'OPTICAL' | 'SAR' | 'TEMPORAL' | 'MULTISPECTRAL';
+
+export type LayerKey = 'OPTICAL' | 'SAR' | 'CHANGE' | 'GROUNDING' | 'EVIDENCE' | 'AGREEMENT';
 
 export interface Coordinates {
   lat: number;
@@ -32,23 +47,14 @@ export interface BoundingBox {
   evidenceId?: string;
 }
 
-export interface EvidenceRegion {
-  id: string;
-  type: EvidenceType;
-  geometry: BoundingBox;
-  confidence: number;
-  sensors: SensorType[];
-  temporal?: TemporalLabel;
-  description: string;
-}
-
 export type EvidenceType =
   | 'Structural change'
   | 'New structure'
   | 'Land-cover change'
   | 'Flood extent'
   | 'Vegetation loss'
-  | 'Grounded object';
+  | 'Grounded object'
+  | 'Infrastructure development';
 
 export interface TemporalLabel {
   t1: string;
@@ -62,6 +68,72 @@ export interface SensorReading {
   label: string;
 }
 
+export interface InputAsset {
+  id: string;
+  name: string;
+  role: 'single' | 't1' | 't2' | 'optical' | 'sar';
+  modality: Modality;
+  format: 'geotiff' | 'tiff' | 'png' | 'jpeg';
+  thumbnailUrl?: string;
+  width?: number;
+  height?: number;
+  bands?: number;
+  bitDepth?: string;
+  acquisitionDate?: string;
+  crs?: string;
+  geotransform?: string;
+  nodataPercentage?: number;
+  georeferencingStatus?: 'georeferenced' | 'pixel_grid' | 'approximate';
+  registrationStatus?: 'co-registered' | 'unregistered' | 'not_applicable';
+  bounds?: [number, number, number, number];
+  compatibility: 'compatible' | 'warning' | 'unsupported' | 'checking';
+  warnings?: string[];
+  sha256?: string;
+}
+
+export interface Interpretation {
+  task: string;
+  inputs: string;
+  area?: string;
+  dates?: string;
+  time?: string;
+  imagery?: string;
+  missing?: string[];
+}
+
+export interface AnalysisPlanSpecialist {
+  id: string;
+  name: string;
+  role: string;
+  purpose: string;
+}
+
+export interface AnalysisPlan {
+  task?: string;
+  summary?: string;
+  inputSummary?: string;
+  areaSummary?: string;
+  timeSummary?: string;
+  specialistPipeline?: string[];
+  specialists?: AnalysisPlanSpecialist[];
+  description?: string;
+  estimatedDuration?: string;
+}
+
+export interface RunEvent {
+  runId: string;
+  stepId: string;
+  phase: string;
+  agent?: string;
+  status: 'queued' | 'active' | 'complete' | 'warning' | 'failed';
+  message: string;
+  timestamp: string;
+  artifactIds?: string[];
+  modelVersion?: string;
+  durationMs?: number;
+}
+
+// Backwards compatibility for existing components
 export interface ExecutionEvent {
   id: string;
   timestamp: string;
@@ -83,37 +155,37 @@ export interface ExecutionEvent {
 export interface EvidenceItem {
   id: string;
   type: EvidenceType;
+  label?: string;
   sensors: SensorType[];
-  confidence: number;
-  temporal: TemporalLabel;
+  confidence: number | 'high' | 'moderate' | 'low';
+  confidenceScore?: number;
+  temporal?: TemporalLabel;
   region: BoundingBox;
-  opticalNotes: string;
-  sarNotes: string;
-  changeMask: boolean;
+  opticalNotes?: string;
+  sarNotes?: string;
+  temporalNotes?: string;
+  changeMask?: boolean;
   imagery: {
-    before: string;
-    after: string;
+    source?: string;
+    before?: string;
+    after?: string;
   };
   location: string;
+  limitations?: string[];
+  geometry?: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
 }
 
-export interface AnalysisResult {
+export interface EvidenceRegion {
   id: string;
-  query: string;
-  answer: string;
-  verdict: Verdict;
+  type: EvidenceType;
+  geometry: BoundingBox;
   confidence: number;
-  sensorAgreement: SensorReading[];
-  crossSensorAgreement: number;
-  evidence: EvidenceItem[];
-  regions: EvidenceRegion[];
-  temporalComparison: TemporalComparison;
-  executionTrace: ExecutionEvent[];
-  taskMode: TaskMode;
   sensors: SensorType[];
-  location: string;
-  createdAt: string;
-  sceneDescription: string;
+  temporal?: TemporalLabel;
+  description: string;
 }
 
 export interface TemporalComparison {
@@ -139,17 +211,78 @@ export interface TemporalChange {
   magnitude: 'high' | 'medium' | 'low';
 }
 
+export interface AnalysisConfidence {
+  value: number;
+  label: 'High' | 'Moderate' | 'Low';
+  basis: string[];
+  uncertaintySentence?: string;
+  ece?: number;
+  temperatureScaling?: number;
+}
+
+export interface AnalysisResult {
+  id: string;
+  query: string;
+  answer: string;
+  verdict: Verdict;
+  confidence: number;
+  confidenceDetail?: AnalysisConfidence;
+  sensorAgreement: SensorReading[];
+  crossSensorAgreement: number;
+  evidence: EvidenceItem[];
+  regions: EvidenceRegion[];
+  temporalComparison: TemporalComparison;
+  executionTrace: ExecutionEvent[];
+  events?: RunEvent[];
+  taskMode: TaskMode;
+  mode?: AnalysisMode;
+  status?: RunStatus;
+  sensors: SensorType[];
+  location: string;
+  createdAt: string;
+  sceneDescription: string;
+  inputs?: InputAsset[];
+  interpretation?: Interpretation;
+  plan?: AnalysisPlan;
+  areaKm2?: number;
+  dateRange?: string;
+  limitations?: string[];
+}
+
 export interface DemoScenario {
   id: string;
   title: string;
+  subtitle?: string;
   description: string;
   query: string;
   taskMode: TaskMode;
+  mode?: AnalysisMode;
   sensors: SensorType[];
   location: string;
   coordinates: Coordinates;
   result: AnalysisResult;
   mapImagery: string;
+  inputs?: InputAsset[];
+  expectedOutputs?: {
+    finding: string;
+    confidence: string;
+    evidenceCount: number;
+    models: string[];
+  };
+}
+
+export interface ModelRegistryEntry {
+  id: string;
+  name: string;
+  version: string;
+  task: string;
+  inputModality: string;
+  resolution: string;
+  architecture: string;
+  weightsHash: string;
+  dateDeployed: string;
+  description: string;
+  parameters: Record<string, string | number | boolean>;
 }
 
 export interface ReportSection {
@@ -176,5 +309,7 @@ export interface GeoJSONFeature {
     id: string;
     type: string;
     confidence: number;
+    description?: string;
+    sensors?: string[];
   };
 }

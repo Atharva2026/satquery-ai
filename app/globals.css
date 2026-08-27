@@ -17,7 +17,8 @@
     background-color: #07111F;
     color: #F3F7FC;
     overflow-x: hidden;
-    antialiased: true;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv11', 'ss01', 'tnum';
     text-rendering: optimizeLegibility;
   }

@@ -25,6 +25,7 @@ export function AnalysisMapSection({
     CHANGE: true,
     GROUNDING: true,
     EVIDENCE: true,
+    AGREEMENT: false,
   });
 
   const imagery = useMemo(

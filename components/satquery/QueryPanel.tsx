@@ -110,6 +110,10 @@ const SENSOR_META: Record<
     label: 'Multi-date',
     description: 'Temporal comparison',
   },
+  MULTISPECTRAL: {
+    label: 'Multispectral',
+    description: 'Spectral band imagery',
+  },
 };
 
 const OBJECT_CATEGORIES = [

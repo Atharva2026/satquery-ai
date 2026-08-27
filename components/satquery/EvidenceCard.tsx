@@ -23,9 +23,18 @@ export function EvidenceCard({
   className,
   compact = false,
 }: EvidenceCardProps) {
-  const pct = Math.round(evidence.confidence * 100);
+  const numConfidence =
+    typeof evidence.confidence === 'number'
+      ? evidence.confidence
+      : evidence.confidence === 'high'
+      ? 0.92
+      : evidence.confidence === 'moderate'
+      ? 0.65
+      : 0.3;
+
+  const pct = Math.round(numConfidence * 100);
   const color =
-    evidence.confidence >= 0.7 ? '#19C37D' : evidence.confidence >= 0.4 ? '#F5A524' : '#7D8CA3';
+    numConfidence >= 0.7 ? '#19C37D' : numConfidence >= 0.4 ? '#F5A524' : '#7D8CA3';
 
   return (
     <button
@@ -72,7 +81,7 @@ export function EvidenceCard({
         </span>
         <span className="flex items-center gap-1 shrink-0">
           <Crosshair size={12} className="text-[#718096]" />
-          {evidence.temporal.t1} → {evidence.temporal.t2}
+          {evidence.temporal ? `${evidence.temporal.t1} → ${evidence.temporal.t2}` : 'Observation Pass'}
         </span>
         {!compact && (
           <span className="flex items-center gap-1 truncate max-w-full">

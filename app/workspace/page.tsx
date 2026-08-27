@@ -65,6 +65,7 @@ function WorkspaceContent() {
     CHANGE: true,
     GROUNDING: true,
     EVIDENCE: true,
+    AGREEMENT: false,
   });
   const [overlayOpacity, setOverlayOpacity] = useState(80);
   const [decisionTab, setDecisionTab] = useState('evidence');

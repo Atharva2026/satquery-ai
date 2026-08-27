@@ -1,492 +1,525 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
-  Satellite,
   ArrowRight,
-  ShieldCheck,
-  Eye,
-  Crosshair,
-  Gauge,
-  Layers,
-  FileText,
-  Ban,
-  AlertTriangle,
   Check,
+  Search,
+  Crosshair,
   Building2,
   Waves,
   TramFront,
   Leaf,
-  ScanLine,
-  GitCompare,
-  Cpu,
-  Sparkles,
+  FileText,
+  Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DecisionBadge } from '@/components/satquery/DecisionBadge';
 import { TopNav } from '@/components/satquery/TopNav';
+import { ProofDemo } from '@/components/landing/ProofDemo';
+import { LandingWorkflows } from '@/components/landing/LandingWorkflows';
+import { LandingOrchestration } from '@/components/landing/LandingOrchestration';
+import { IMG } from '@/lib/mock-data';
 
-const heroMapImagery =
-  'https://images.pexels.com/photos/27938904/pexels-photo-27938904.jpeg?auto=compress&cs=tinysrgb&w=1260&h=900';
-
-const problemPoints = [
-  {
-    icon: Eye,
-    title: 'Satellite imagery is opaque',
-    desc: 'Raw multi-spectral raster data requires human domain expertise. Decision-makers cannot act on raw pixels alone without traceable context.',
-  },
-  {
-    icon: AlertTriangle,
-    title: 'AI answers without evidence',
-    desc: 'Traditional vision-language models hallucinate answers with no spatial grounding, no traceable reasoning, and zero uncertainty reporting.',
-  },
-  {
-    icon: Ban,
-    title: 'Silent failure is dangerous',
-    desc: 'When models lack evidence, they still answer. Unreliable decisions get treated as fact in high-stakes defence and disaster management operations.',
-  },
-];
-
-const workflowSteps = [
-  { icon: Satellite, label: 'Map Canvas', desc: 'Orthorectified satellite imagery loaded as the primary canvas' },
-  { icon: Crosshair, label: 'Evidence Grounding', desc: 'Spatial bounding regions bind claims directly to pixels' },
-  { icon: ShieldCheck, label: 'Decision Engine', desc: 'A verdict grounded strictly in corroborated multi-sensor evidence' },
-  { icon: Gauge, label: 'Calibrated Confidence', desc: 'Uncertainty-aware cross-sensor convergence scoring' },
-  { icon: FileText, label: 'Audit Trail', desc: 'Observable step-by-step execution trace for every query' },
-];
-
-const pillars = [
-  {
-    icon: ScanLine,
-    title: 'Evidence-first approach',
-    desc: 'Every answer is backed by spatial evidence. Grounding regions on the map connect each claim to the satellite imagery that produced it.',
-  },
-  {
-    icon: GitCompare,
-    title: 'Cross-sensor verification',
-    desc: 'Optical and SAR evidence are checked against each other. Agreement between independent sensors increases confidence; disagreement surfaces uncertainty.',
-  },
-  {
-    icon: Gauge,
-    title: 'Confidence calibration',
-    desc: 'Confidence is calibrated against cross-sensor agreement, not a raw model logit. The score reflects statistical calibration under temperature scaling.',
-  },
-  {
-    icon: Ban,
-    title: 'Abstention as a feature',
-    desc: 'When evidence is insufficient or contradictory, SatQuery refuses to guess. Explicit abstention prevents catastrophic misinterpretation.',
-  },
-  {
-    icon: Cpu,
-    title: 'Observable execution trace',
-    desc: 'Every analysis produces a timestamped trace of pipeline events: validation, classification, model execution, evidence generation, and verdict.',
-  },
-  {
-    icon: FileText,
-    title: '6-Page A4 intelligence briefing',
-    desc: 'An official intelligence briefing captures input metadata, AI output, visual evidence, calibrated confidence, and full execution traces.',
-  },
-];
-
-const indiaScenarios = [
-  { icon: Building2, title: 'Urban Growth', desc: 'Track peri-urban structural expansion across seasonal baselines.' },
-  { icon: Waves, title: 'Flood Impact', desc: 'Assess inundation extent with optical and SAR cloud-penetrating checks.' },
-  { icon: TramFront, title: 'Infrastructure Monitoring', desc: 'Monitor highway and industrial corridors for new construction activity.' },
-  { icon: Leaf, title: 'Land-Cover Change', desc: 'Detect vegetation loss, deforestation, and agricultural transitions.' },
-];
+const GlobeHero = dynamic(
+  () => import('@/components/landing/GlobeHero').then((m) => m.GlobeHero),
+  { ssr: false }
+);
 
 export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-[#07111F] text-[#F3F7FC]">
-      {/* Top Header */}
-      <TopNav />
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-      {/* Hero Section */}
-      <section className="relative max-w-[1440px] mx-auto px-6 sm:px-10 pt-16 pb-20 select-none">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#20A4F3]/30 bg-[#102B45] shadow-xs">
-              <ShieldCheck size={14} className="text-[#20A4F3]" />
-              <span className="text-xs font-bold text-[#35B7FF] uppercase tracking-wider">
-                Evidence-First Geospatial Decision Intelligence
-              </span>
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollableHeight <= 0) return;
+      const progress = Math.min(1, Math.max(0, window.scrollY / scrollableHeight));
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const progressPercent = Math.min(100, Math.max(0, Math.round(scrollProgress * 100)));
+
+  return (
+    <div className="relative min-h-screen bg-[#07111F] text-[#F1F5F9] font-sans selection:bg-[#20A4F3]/20">
+      {/* PERSISTENT FULL-PAGE FIXED 3D GLOBE BACKDROP */}
+      <GlobeHero scrollProgress={scrollProgress} />
+
+      {/* FOREGROUND CONTENT LAYER */}
+      <div className="relative z-10">
+        {/* Top Global Navigation */}
+        <TopNav />
+
+        {/* SECTION 1: HERO VIEW (With Hero-Scoped HUD & Contrast Scrim) */}
+        <section className="relative min-h-[calc(100vh-3.5rem)] flex flex-col justify-between max-w-[1280px] mx-auto px-6 sm:px-10 py-10">
+          {/* Subtle Contrast Scrim Gradient (Left Column Only) */}
+          <div className="absolute inset-y-0 left-0 w-full sm:w-[680px] bg-gradient-to-r from-[#07111F]/95 via-[#07111F]/70 to-transparent pointer-events-none -z-10" />
+
+          {/* Top Hero-Scoped HUD Metadata (Scrolls away with Hero) */}
+          <div className="flex items-start justify-between font-mono text-xs z-10 pt-2 pointer-events-none">
+            {/* Left HUD */}
+            <div className="space-y-1.5 pointer-events-auto">
+              <div className="text-[11px] font-bold tracking-[0.2em] text-[#F8FAFC]">
+                GLOBE <span className="text-[9px] text-[#64748B]">3D</span>
+              </div>
+              <div className="space-y-0.5 text-[10px] text-[#64748B]">
+                <div className="flex gap-3">
+                  <span className="w-14">SCENE</span>
+                  <span className="text-[#94A3B8]">01 / GLOBAL RECON</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-14">DATASET</span>
+                  <span className="text-[#94A3B8]">SENTINEL-1/2 CONSTELLATION</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-14">PROGRESS</span>
+                  <span className="text-[#38BDF8]">{progressPercent}%</span>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#F3F7FC] leading-[1.15] text-balance">
-              Query Satellite Imagery.
-              <br />
-              <span className="text-[#20A4F3]">Get decisions you can verify.</span>
+
+            {/* Right HUD Controls */}
+            <div className="flex items-center gap-2 pointer-events-auto">
+              <button
+                type="button"
+                className="w-7 h-7 rounded border border-[#1E293B] bg-[#07111F]/80 text-[#94A3B8] hover:text-[#F8FAFC] flex items-center justify-center transition-colors"
+                title="Search region"
+              >
+                <Search size={13} />
+              </button>
+              <button
+                type="button"
+                className="w-7 h-7 rounded border border-[#1E293B] bg-[#07111F]/80 text-[#38BDF8] hover:text-[#F8FAFC] flex items-center justify-center transition-colors"
+                title="Target AOI"
+              >
+                <Crosshair size={13} />
+              </button>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded border border-[#1E293B] bg-[#07111F]/80 text-[10px] text-[#94A3B8]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                <span>LIVE</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Center Main Headline & Mission Control Description */}
+          <div className="max-w-xl space-y-5 my-auto py-12">
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded border border-[#1E293B] bg-[#07111F]/90 text-[11px] font-mono text-[#94A3B8]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+              <span>PRECISION REMOTE-SENSING DECISION PLATFORM</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-bold tracking-tight text-[#F8FAFC] leading-[1.15]">
+              Multimodal Satellite Intelligence &amp; Evidence Grounding.
             </h1>
-            <p className="text-sm sm:text-base text-[#A8B5C7] max-w-lg leading-relaxed font-normal">
-              Transform optical, SAR, and bi-temporal satellite imagery into evidence-backed, uncertainty-calibrated intelligence reports for analysts and operational leaders.
+
+            <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
+              Query optical, SAR, and bi-temporal satellite rasters in natural language. Automated specialist routing isolates candidate regions, calculates calibrated confidence, and extracts pixel-grounded evidence.
             </p>
-            <div className="flex items-center gap-3 pt-2">
-              <Link href="/workspace">
-                <Button className="bg-[#20A4F3] text-[#07111F] hover:bg-[#35B7FF] gap-2 h-11 px-6 text-xs font-bold shadow-sm">
-                  <span>Launch Decision Console</span>
-                  <ArrowRight size={15} />
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Link href="/analyze">
+                <Button className="bg-[#2563EB] text-[#FFFFFF] hover:bg-[#1D4ED8] gap-2 h-9 px-4 text-xs font-semibold transition-colors shadow-sm">
+                  <span>Start analysis</span>
+                  <ArrowRight size={13} />
                 </Button>
               </Link>
-              <Link href="/datasets">
+              <Link href="/demo">
                 <Button
                   variant="outline"
-                  className="h-11 px-6 text-xs font-semibold text-[#A8B5C7] border-[#24344A] bg-[#101C2E] hover:bg-[#142238] hover:text-[#F3F7FC]"
+                  className="h-9 px-4 text-xs font-medium text-[#94A3B8] border-[#1E293B] bg-[#07111F]/80 hover:bg-[#0F172A] hover:text-[#F8FAFC]"
                 >
-                  Explore Catalog
+                  Explore demo
                 </Button>
               </Link>
             </div>
-            <div className="flex flex-wrap items-center gap-6 pt-2 text-xs font-semibold text-[#A8B5C7]">
-              <div className="flex items-center gap-1.5">
-                <Check size={14} className="text-[#19C37D]" />
-                <span>Spatial evidence grounding</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Check size={14} className="text-[#19C37D]" />
-                <span>Cross-sensor verification</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Check size={14} className="text-[#19C37D]" />
-                <span>Calibrated confidence</span>
-              </div>
+
+            {/* Factual Capability Specs */}
+            <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-[#94A3B8]">
+              <span className="flex items-center gap-1.5">
+                <Check size={13} className="text-[#10B981]" />
+                <span>Single-image VQA</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check size={13} className="text-[#10B981]" />
+                <span>Before + after change</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check size={13} className="text-[#10B981]" />
+                <span>Optical + SAR fusion</span>
+              </span>
             </div>
           </div>
 
-          {/* Hero Visual — Simulated Product Console */}
-          <div className="relative animate-fade-in-up">
-            <div className="relative rounded-xl border border-[#24344A] bg-[#101C2E] shadow-2xl overflow-hidden">
-              {/* Header Bar */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#24344A] bg-[#081322]">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#F05D6C]" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#F5A524]" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#19C37D]" />
-                  </div>
-                  <span className="font-mono text-[10px] text-[#A8B5C7] ml-2">
-                    SATQUERY / workspace / urban-growth
-                  </span>
-                </div>
-                <div className="font-mono text-[10px] text-[#22C7D6]">
-                  28.4595°N, 77.0266°E
-                </div>
-              </div>
+          {/* Bottom Hero Scroll Prompt */}
+          <div className="flex items-center justify-between font-mono text-[10px] text-[#64748B] pb-2">
+            <div>SatQuery RS // INTERACTIVE EARTH OBSERVATION</div>
+            <div className="flex items-center gap-1 text-[#38BDF8]">
+              <span>SCROLL TO EXPLORE</span>
+              <span>↓</span>
+            </div>
+          </div>
+        </section>
 
-              {/* Map Area */}
-              <div className="relative h-80 bg-[#07111F]">
-                <img
-                  src={heroMapImagery}
-                  alt="Satellite analysis scene"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 sq-grid-overlay-dark" />
-                {/* Evidence Boxes */}
-                {[
-                  { x: 18, y: 25, w: 16, h: 18, c: '#19C37D', l: 'R-01 · 94%' },
-                  { x: 42, y: 32, w: 14, h: 16, c: '#19C37D', l: 'R-02 · 91%' },
-                  { x: 62, y: 20, w: 18, h: 20, c: '#19C37D', l: 'R-03 · 89%' },
-                  { x: 28, y: 55, w: 16, h: 14, c: '#F5A524', l: 'R-04 · 68%' },
-                ].map((r, i) => (
-                  <div
-                    key={i}
-                    className="absolute group"
-                    style={{
-                      left: `${r.x}%`,
-                      top: `${r.y}%`,
-                      width: `${r.w}%`,
-                      height: `${r.h}%`,
-                    }}
-                  >
-                    <div
-                      className="absolute inset-0 border-2 rounded-xs"
-                      style={{ borderColor: r.c, backgroundColor: `${r.c}20` }}
-                    />
-                    <div
-                      className="absolute -top-5 left-0 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold text-[#07111F] whitespace-nowrap"
-                      style={{ backgroundColor: r.c }}
-                    >
-                      {r.l}
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* SECTION 2: INTERACTIVE SATELLITE ANALYSIS PROOF (Solid High-Contrast Surface) */}
+        <section className="bg-[#07111F] border-y border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 space-y-6">
+            <div className="max-w-xl space-y-1">
+              <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+                Demonstration
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#F8FAFC]">
+                Ask a question. SatQuery finds the evidence.
+              </h2>
+              <p className="text-xs text-[#94A3B8]">
+                Natural language queries trigger multi-sensor routing, candidate isolation, and verified evidence grounding.
+              </p>
+            </div>
 
-              {/* Decision Panel Preview Strip */}
-              <div className="grid grid-cols-3 gap-0 border-t border-[#24344A] bg-[#0B1628]">
-                <div className="p-3.5 border-r border-[#24344A]">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#718096] block">
-                    Answer
-                  </span>
-                  <p className="text-xs text-[#F3F7FC] font-medium mt-1 line-clamp-1">
-                    17 probable new structures detected
-                  </p>
-                </div>
-                <div className="p-3.5 border-r border-[#24344A]">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#718096] block">
-                    Confidence
-                  </span>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 rounded-full bg-[#0D192A] border border-[#24344A] overflow-hidden">
-                      <div className="h-full w-[92%] rounded-full bg-[#19C37D]" />
-                    </div>
-                    <span className="font-mono text-xs font-bold text-[#19C37D]">92%</span>
+            <ProofDemo />
+          </div>
+        </section>
+
+        {/* SECTION 3: THREE SUPPORTED WORKFLOWS (Solid High-Contrast Surface) */}
+        <section className="bg-[#0B132B] border-b border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 space-y-8">
+            <div className="max-w-xl space-y-1">
+              <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+                Modalities
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#F8FAFC]">
+                Three Core Remote-Sensing Workflows
+              </h2>
+              <p className="text-xs text-[#94A3B8]">
+                Automated task classification assigns inputs to dedicated vision-language and remote-sensing architectures.
+              </p>
+            </div>
+
+            <LandingWorkflows />
+          </div>
+        </section>
+
+        {/* SECTION 4: EVIDENCE-FIRST RESULT (Solid High-Contrast Surface) */}
+        <section className="bg-[#07111F] border-b border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 grid lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5 space-y-4">
+              <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+                Spatial Grounding
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#F8FAFC]">
+                Every Finding is Bound to Spatial Pixels
+              </h2>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                SatQuery extracts coordinate bounding boxes and vector polygons that bind claims directly to satellite imagery, eliminating unsubstantiated text outputs.
+              </p>
+              <div className="space-y-2 text-xs pt-1">
+                <div className="p-3 rounded-lg bg-[#0B132B] border border-[#1E293B]">
+                  <div className="font-semibold text-[#F1F5F9]">Numbered Evidence Regions</div>
+                  <div className="text-[#94A3B8] text-[11px] mt-0.5">
+                    Inspect before/after crops, sensor basis, and localized confidence for each polygon.
                   </div>
                 </div>
-                <div className="p-3.5 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#718096] block">
-                      Verdict
-                    </span>
-                    <div className="mt-1">
-                      <DecisionBadge verdict="CONFIDENT" size="sm" />
-                    </div>
+                <div className="p-3 rounded-lg bg-[#0B132B] border border-[#1E293B]">
+                  <div className="font-semibold text-[#F1F5F9]">Cross-Modal Corroboration</div>
+                  <div className="text-[#94A3B8] text-[11px] mt-0.5">
+                    Optical and SAR evidence cross-validate each other to eliminate false positives.
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Floating Evidence Badge */}
-            <div className="absolute -bottom-4 -left-4 rounded-lg border border-[#24344A] bg-[#101C2E] shadow-xl px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <Crosshair size={16} className="text-[#20A4F3]" />
-                <div>
-                  <div className="font-mono text-xs font-bold text-[#F3F7FC]">EV-1001</div>
-                  <div className="text-[10px] text-[#A8B5C7]">Structural change · 94% confidence</div>
+            {/* Visual Split Exhibit */}
+            <div className="lg:col-span-7 rounded-xl bg-[#0B132B] border border-[#1E293B] p-4 space-y-3">
+              <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
+                <span className="text-xs font-mono font-medium text-[#94A3B8]">
+                  Evidence Inspection Exhibit
+                </span>
+                <span className="text-xs font-mono text-[#10B981]">
+                  6 verified clusters
+                </span>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-mono text-[#64748B]">T1: 14 JAN 2026 (OPTICAL)</div>
+                  <div className="h-40 rounded-lg overflow-hidden border border-[#1E293B]">
+                    <img src={IMG.urbanT1} alt="T1" className="w-full h-full object-cover" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-mono text-[#38BDF8]">T2: 22 AUG 2026 (GROUNDED)</div>
+                  <div className="relative h-40 rounded-lg overflow-hidden border border-[#38BDF8]/40">
+                    <img src={IMG.urbanT2} alt="T2" className="w-full h-full object-cover" />
+                    <div className="absolute inset-4 border border-[#38BDF8] bg-[#38BDF8]/10 rounded-sm" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Problem Section */}
-      <section className="bg-[#0B1628] border-y border-[#24344A] py-20">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10">
-          <div className="max-w-2xl mb-12">
-            <span className="text-[11px] font-mono font-bold text-[#20A4F3] uppercase tracking-wider bg-[#102B45] px-2 py-0.5 rounded border border-[#20A4F3]/30">
-              OPERATIONAL CHALLENGE
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight text-[#F3F7FC] mt-3 mb-3">
-              Imagery is abundant. Decisions are not.
-            </h2>
-            <p className="text-sm text-[#A8B5C7] leading-relaxed">
-              Earth-observation data multiplies daily, but converting multi-spectral rasters into verifiable decisions remains the critical bottleneck.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {problemPoints.map((p) => (
-              <div
-                key={p.title}
-                className="rounded-xl border border-[#24344A] bg-[#101C2E] p-6 space-y-3"
-              >
-                <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-[#142238] border border-[#24344A]">
-                  <p.icon size={20} className="text-[#20A4F3]" />
-                </div>
-                <h3 className="text-base font-bold text-[#F3F7FC]">{p.title}</h3>
-                <p className="text-xs text-[#A8B5C7] leading-relaxed">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        {/* SECTION 5: OPTICAL + SAR FUSION COMPARISON (Solid High-Contrast Surface) */}
+        <section className="bg-[#0B132B] border-b border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 space-y-6">
+            <div className="max-w-xl space-y-1">
+              <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+                Sensor Fusion
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#F8FAFC]">
+                Radar &amp; Optical Agreement
+              </h2>
+              <p className="text-xs text-[#94A3B8]">
+                When clouds or darkness obscure optical vision, synthetic aperture radar (SAR) provides independent structural backscatter.
+              </p>
+            </div>
 
-      {/* Workflow Section */}
-      <section className="py-20">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10">
-          <div className="max-w-2xl mb-12">
-            <span className="text-[11px] font-mono font-bold text-[#22C7D6] uppercase tracking-wider bg-[#102B45] px-2 py-0.5 rounded border border-[#20A4F3]/30">
-              SYSTEM ARCHITECTURE
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight text-[#F3F7FC] mt-3 mb-3">
-              Query → Evidence → Decision → Confidence → Audit
-            </h2>
-            <p className="text-sm text-[#A8B5C7] leading-relaxed">
-              The core experience is not a generic chatbot. It is a structured geospatial intelligence pipeline where the satellite canvas and mathematical evidence dominate.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-5 gap-4">
-            {workflowSteps.map((step, i) => (
-              <div key={step.label} className="relative">
-                <div className="rounded-xl border border-[#24344A] bg-[#101C2E] p-5 h-full space-y-2">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#142238] border border-[#24344A]">
-                    <step.icon size={18} className="text-[#20A4F3]" />
-                  </div>
-                  <h3 className="text-xs font-bold text-[#F3F7FC]">
-                    {step.label}
-                  </h3>
-                  <p className="text-[11px] text-[#A8B5C7] leading-relaxed">{step.desc}</p>
+            <div className="grid md:grid-cols-2 gap-5">
+              <div className="p-4 rounded-xl bg-[#07111F] border border-[#1E293B] space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-[#F1F5F9]">Optical Surface View (Sentinel-2)</span>
+                  <span className="text-[10px] font-mono text-[#F59E0B]">48% Cloud Cover</span>
                 </div>
-                {i < workflowSteps.length - 1 && (
-                  <ArrowRight
-                    size={16}
-                    className="hidden md:block absolute top-1/2 -right-3 -translate-y-1/2 text-[#24344A] z-10"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pillars */}
-      <section className="bg-[#0B1628] border-y border-[#24344A] py-20">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10">
-          <div className="max-w-2xl mb-12">
-            <span className="text-[11px] font-mono font-bold text-[#20A4F3] uppercase tracking-wider bg-[#102B45] px-2 py-0.5 rounded border border-[#20A4F3]/30">
-              CORE CAPABILITIES
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight text-[#F3F7FC] mt-3 mb-3">
-              Engineered for Mission-Critical Trust
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pillars.map((pillar) => (
-              <div
-                key={pillar.title}
-                className="rounded-xl border border-[#24344A] bg-[#101C2E] p-6 space-y-3 hover:border-[#20A4F3]/50 transition-all hover:bg-[#142238]"
-              >
-                <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-[#142238] border border-[#24344A]">
-                  <pillar.icon size={20} className="text-[#22C7D6]" />
+                <div className="h-48 rounded-lg overflow-hidden border border-[#1E293B]">
+                  <img src={IMG.floodT2} alt="Optical Flood" className="w-full h-full object-cover" />
                 </div>
-                <h3 className="text-base font-bold text-[#F3F7FC]">
-                  {pillar.title}
-                </h3>
-                <p className="text-xs text-[#A8B5C7] leading-relaxed">
-                  {pillar.desc}
+                <p className="text-xs text-[#94A3B8]">
+                  Optical water indices identify inundation boundaries, but cloud shadows create uncertainty along river reaches.
                 </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Verdict States Section */}
-      <section className="py-20">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10">
-          <div className="max-w-2xl mb-12">
-            <span className="text-[11px] font-mono font-bold text-[#20A4F3] uppercase tracking-wider bg-[#102B45] px-2 py-0.5 rounded border border-[#20A4F3]/30">
-              UNCERTAINTY-AWARE UX
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight text-[#F3F7FC] mt-3 mb-3">
-              Three Explicit Verdicts. Zero Hidden Failure.
-            </h2>
-            <p className="text-sm text-[#A8B5C7] leading-relaxed">
-              SatQuery never hides uncertainty. Every query concludes with one of three verifiable verdicts.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Confident */}
-            <div className="rounded-xl border border-[#19C37D]/40 bg-[#101C2E] p-6 space-y-3">
-              <DecisionBadge verdict="CONFIDENT" size="md" />
-              <h3 className="text-base font-bold text-[#F3F7FC] mt-2">
-                Confident
-              </h3>
-              <p className="text-xs text-[#A8B5C7] leading-relaxed">
-                Cross-sensor agreement is high. Optical and SAR evidence converge with strong multi-pass IoU overlap.
-              </p>
-              <div className="flex items-center gap-2 pt-2 border-t border-[#24344A]">
-                <Check size={16} className="text-[#19C37D]" />
-                <span className="font-mono text-xs font-bold text-[#19C37D]">92% calibrated confidence</span>
-              </div>
-            </div>
-
-            {/* Uncertain */}
-            <div className="rounded-xl border border-[#F5A524]/40 bg-[#101C2E] p-6 space-y-3">
-              <DecisionBadge verdict="UNCERTAIN" size="md" />
-              <h3 className="text-base font-bold text-[#F3F7FC] mt-2">
-                Uncertain
-              </h3>
-              <p className="text-xs text-[#A8B5C7] leading-relaxed">
-                Sensors partially disagree or cloud shadow creates ambiguity. The system surfaces what conflicted.
-              </p>
-              <div className="flex items-center gap-2 pt-2 border-t border-[#24344A]">
-                <AlertTriangle size={16} className="text-[#F5A524]" />
-                <span className="font-mono text-xs font-bold text-[#F5A524]">54% calibrated confidence</span>
-              </div>
-            </div>
-
-            {/* Abstain */}
-            <div className="rounded-xl border border-[#F05D6C]/40 bg-[#101C2E] p-6 space-y-3">
-              <DecisionBadge verdict="ABSTAIN" size="md" />
-              <h3 className="text-base font-bold text-[#F3F7FC] mt-2">
-                Abstain
-              </h3>
-              <p className="text-xs text-[#A8B5C7] leading-relaxed">
-                Evidence is insufficient. The system refuses to render an answer rather than produce an unreliable decision.
-              </p>
-              <div className="flex items-center gap-2 pt-2 border-t border-[#24344A]">
-                <Ban size={16} className="text-[#F05D6C]" />
-                <span className="font-mono text-xs font-bold text-[#F05D6C]">Safety refusal enforced</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* India-First Scenarios */}
-      <section className="bg-[#0B1628] border-y border-[#24344A] py-20">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10">
-          <div className="max-w-2xl mb-12">
-            <span className="text-[11px] font-mono font-bold text-[#20A4F3] uppercase tracking-wider bg-[#102B45] px-2 py-0.5 rounded border border-[#20A4F3]/30">
-              NATIONAL EO USE CASES
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight text-[#F3F7FC] mt-3 mb-3">
-              Geospatial Decisions Across Indian Landscapes
-            </h2>
-            <p className="text-sm text-[#A8B5C7] leading-relaxed">
-              Tailored for high-impact decision contexts — from peri-urban expansion to Brahmaputra monsoon inundation.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {indiaScenarios.map((s) => (
-              <div
-                key={s.title}
-                className="rounded-xl border border-[#24344A] bg-[#101C2E] p-5 space-y-2 hover:border-[#20A4F3]/50 transition-colors"
-              >
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#142238] border border-[#24344A]">
-                  <s.icon size={18} className="text-[#20A4F3]" />
+              <div className="p-4 rounded-xl bg-[#07111F] border border-[#1E293B] space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-[#F1F5F9]">SAR Radar Coherence (Sentinel-1)</span>
+                  <span className="text-[10px] font-mono text-[#10B981]">Cloud Penetrated</span>
                 </div>
-                <h3 className="text-xs font-bold text-[#F3F7FC]">
-                  {s.title}
-                </h3>
-                <p className="text-[11px] text-[#A8B5C7] leading-relaxed">{s.desc}</p>
+                <div className="h-48 rounded-lg overflow-hidden border border-[#1E293B]">
+                  <img src={IMG.flood} alt="SAR Flood" className="w-full h-full object-cover grayscale contrast-125" />
+                </div>
+                <p className="text-xs text-[#94A3B8]">
+                  Radar passes through clouds; smooth water reflects microwave pulses away, producing distinct dark pixel clusters.
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24">
-        <div className="max-w-3xl mx-auto px-6 text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#F3F7FC] text-balance">
-            Stop Guessing. Start Verifying.
-          </h2>
-          <p className="text-sm text-[#A8B5C7] max-w-xl mx-auto leading-relaxed">
-            Launch the geospatial intelligence console and explore demo scenarios with full evidence grounding, calibrated confidence, and observable audit logs.
-          </p>
-          <Link href="/workspace">
-            <Button className="bg-[#20A4F3] text-[#07111F] hover:bg-[#35B7FF] gap-2 h-12 px-8 text-xs font-bold shadow-md">
-              Launch SatQuery Console
-              <ArrowRight size={16} />
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-[#24344A] py-8 bg-[#081322]">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-7 h-7 rounded-md bg-[#20A4F3] text-[#07111F]">
-              <Satellite size={15} />
             </div>
-            <span className="font-bold text-sm text-[#F3F7FC] tracking-tight">
-              SATQUERY<span className="text-[#20A4F3]"> AI</span>
-            </span>
           </div>
-          <p className="text-xs text-[#718096] font-mono">
-            Evidence-first satellite decision intelligence console · ISRO / SAC Hackathon Architecture
-          </p>
-        </div>
-      </footer>
+        </section>
+
+        {/* SECTION 6: AGENTIC ORCHESTRATION (Solid High-Contrast Surface) */}
+        <section className="bg-[#07111F] border-b border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10">
+            <LandingOrchestration />
+          </div>
+        </section>
+
+        {/* SECTION 7: CONFIDENCE & UNCERTAINTY (Solid High-Contrast Surface) */}
+        <section className="bg-[#0B132B] border-b border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 grid lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-6 space-y-4">
+              <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+                Uncertainty Calibration
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#F8FAFC]">
+                Calibrated Confidence &amp; Explicit Abstention
+              </h2>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                Platt temperature scaling (T=1.35) and multi-sensor agreement penalties ensure confidence percentages reflect statistical truth rather than raw uncalibrated logits.
+              </p>
+              <div className="p-3.5 rounded-lg bg-[#07111F] border border-[#1E293B] space-y-1 text-xs">
+                <span className="font-semibold text-[#F59E0B] block">Safety Abstention</span>
+                <p className="text-[#94A3B8]">
+                  When sensor coverage is insufficient or cloud occlusion prevents verification, SatQuery explicitly refuses to guess.
+                </p>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 p-5 rounded-xl bg-[#07111F] border border-[#1E293B] space-y-3.5">
+              <div className="flex items-center justify-between border-b border-[#1E293B] pb-2 text-xs">
+                <span className="font-semibold text-[#F1F5F9]">Confidence Breakdown</span>
+                <span className="font-mono text-[#10B981] font-medium">92% High</span>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs text-[#94A3B8]">
+                  <span>Statistical Calibration</span>
+                  <span className="font-mono text-[#F1F5F9]">0.92</span>
+                </div>
+                <div className="h-1.5 w-full bg-[#0B132B] rounded-full overflow-hidden border border-[#1E293B]">
+                  <div className="h-full bg-[#10B981] w-[92%] rounded-full" />
+                </div>
+              </div>
+
+              <div className="space-y-1.5 pt-1 text-xs text-[#94A3B8]">
+                <div className="flex justify-between py-1 border-b border-[#1E293B]/60">
+                  <span>Optical change likelihood</span>
+                  <span className="font-mono text-[#F1F5F9]">0.89</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-[#1E293B]/60">
+                  <span>SAR double-bounce likelihood</span>
+                  <span className="font-mono text-[#F1F5F9]">0.91</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span>Expected Calibration Error (ECE)</span>
+                  <span className="font-mono text-[#10B981]">3.7%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 8: REPORTS & AUDIT PREVIEW (Solid High-Contrast Surface) */}
+        <section className="bg-[#07111F] border-b border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 grid lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-6 space-y-3">
+              <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+                Dossiers &amp; Export
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#F8FAFC]">
+                6-Page A4 Intelligence Dossier
+              </h2>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                Export comprehensive intelligence dossiers ready for operational distribution. Includes visual evidence crops, CRS bounds, calibrated confidence, model weights hashes, and GeoJSON GIS layers.
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="px-2 py-0.5 rounded bg-[#0B132B] border border-[#1E293B] text-[11px] font-mono text-[#94A3B8]">
+                  A4 PDF
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[#0B132B] border border-[#1E293B] text-[11px] font-mono text-[#94A3B8]">
+                  GeoJSON
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[#0B132B] border border-[#1E293B] text-[11px] font-mono text-[#94A3B8]">
+                  CSV
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[#0B132B] border border-[#1E293B] text-[11px] font-mono text-[#94A3B8]">
+                  Audit JSON
+                </span>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 rounded-xl bg-[#0B132B] border border-[#1E293B] p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-[#1E293B] pb-2.5">
+                <span className="text-xs font-mono font-medium text-[#F1F5F9]">
+                  Intelligence Briefing Summary
+                </span>
+                <Link href="/reports/analysis-urban-growth">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-6 px-2 text-[11px] bg-[#07111F] border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC]"
+                  >
+                    <Download size={11} className="mr-1" />
+                    <span>View Dossier</span>
+                  </Button>
+                </Link>
+              </div>
+              <div className="space-y-1.5 text-xs font-mono text-[#94A3B8]">
+                <div className="flex justify-between">
+                  <span>Classification:</span>
+                  <span className="text-[#10B981]">Official // Satellite Intelligence</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Target AOI:</span>
+                  <span className="text-[#F1F5F9]">Pune Peri-Urban Extension</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Sensor Channels:</span>
+                  <span>Sentinel-2 (10m) + Sentinel-1 SAR</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 9: USE CASES (Solid High-Contrast Surface) */}
+        <section className="bg-[#0B132B] border-b border-[#1E293B] py-16">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 space-y-8">
+            <div className="max-w-xl space-y-1">
+              <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+                Operational Applications
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#F8FAFC]">
+                Geospatial Decision Support
+              </h2>
+              <p className="text-xs text-[#94A3B8]">
+                From disaster management to infrastructure monitoring, SatQuery provides verifiable decisions.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-xl bg-[#07111F] border border-[#1E293B] space-y-2">
+                <h3 className="text-xs font-semibold text-[#F8FAFC]">Urban Expansion</h3>
+                <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                  Track illegal constructions, warehouse development, and peri-urban infrastructure changes across quarterly baselines.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#07111F] border border-[#1E293B] space-y-2">
+                <h3 className="text-xs font-semibold text-[#F8FAFC]">Disaster Inundation</h3>
+                <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                  Map monsoon flood extent through dense cloud layers using all-weather SAR radar backscatter reflection.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#07111F] border border-[#1E293B] space-y-2">
+                <h3 className="text-xs font-semibold text-[#F8FAFC]">Transit Corridors</h3>
+                <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                  Monitor highway alignments, railway grade construction, and environmental encroachment along rights of way.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#07111F] border border-[#1E293B] space-y-2">
+                <h3 className="text-xs font-semibold text-[#F8FAFC]">Land-Cover Transitions</h3>
+                <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                  Quantify deforestation, wetland degradation, and agricultural crop conversion with spatial evidence.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 10: FINAL CTA & FOOTER (Solid High-Contrast Surface) */}
+        <section className="bg-[#07111F] pt-14 pb-10">
+          <div className="max-w-[1280px] mx-auto px-6 sm:px-10 space-y-10">
+            <div className="rounded-2xl bg-[#0B132B] border border-[#1E293B] p-8 sm:p-10 text-center space-y-4 max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#F8FAFC]">
+                Start an analysis on your imagery
+              </h2>
+              <p className="text-xs sm:text-sm text-[#94A3B8] max-w-md mx-auto">
+                Get grounded findings with spatial polygons, cross-sensor radar validation, and verifiable intelligence dossiers.
+              </p>
+              <div className="flex items-center justify-center gap-3 pt-1">
+                <Link href="/analyze">
+                  <Button className="bg-[#2563EB] text-[#FFFFFF] hover:bg-[#1D4ED8] gap-1.5 h-9 px-5 text-xs font-semibold">
+                    <span>Start Analysis</span>
+                    <ArrowRight size={13} />
+                  </Button>
+                </Link>
+                <Link href="/demo">
+                  <Button
+                    variant="outline"
+                    className="h-9 px-4 text-xs font-medium text-[#94A3B8] border-[#1E293B] bg-[#07111F] hover:bg-[#0F172A] hover:text-[#F8FAFC]"
+                  >
+                    Explore Demo
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-[#1E293B]/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono text-[#64748B]">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-[#94A3B8]">SatQuery RS</span>
+                <span>· Remote-Sensing Decision Platform</span>
+              </div>
+              <div>WGS 84 (EPSG:4326) · Sentinel-1/2 &amp; Landsat-9</div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
